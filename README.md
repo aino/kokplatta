@@ -1,3 +1,6 @@
+## Kokplatta
+Boilerplate code for next gen web apps!
+
 ## Get started
 
 ```
