@@ -15,19 +15,15 @@ module.exports = {
       filename: 'all.bundle.js'
   },
   resolve: {
-    modulesDirectories: ['bower_components', 'node_modules', 'src/js']
+    modulesDirectories: ['bower_components', 'src/js']
   },
   module: {
     loaders: [
-      // { test: /\.css/, loader: 'style-loader!css-loader' },
-      // { test: /\.gif/, loader: 'url-loader?limit=10000&minetype=image/gif' },
-      // { test: /\.jpg/, loader: 'url-loader?limit=10000&minetype=image/jpg' },
-      // { test: /\.png/, loader: 'url-loader?limit=10000&minetype=image/png' },
       { test: /\.js$/, loader: 'jsx-loader' }
     ],
     noParse: /\.min\.js/
   },
   plugins: [
-    new webpack.optimize.UglifyJsPlugin()
+    //new webpack.optimize.UglifyJsPlugin()
   ]
 }
