@@ -38,12 +38,8 @@ if ( ~~nodeversion.match(/\d+\.(\d+)/)[1] > 10 ) {
 // Styles
 gulp.task('styles', function() {
   return gulp.src(config.src + 'css/main.css')
-   .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2'))
-   //.pipe(rename({ extname: '.css' }))
-   .pipe(gulp.dest(config.public + 'css'))
-   //.pipe(rename({ suffix: '.min' }))
-   //.pipe(minifycss())
-   //.pipe(gulp.dest(config.public + 'css'))
+    .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2'))
+    .pipe(gulp.dest(config.public + 'css'))
 })
 
 // Shims
@@ -55,11 +51,11 @@ gulp.task('shims', function() {
     .pipe(concat('shims.min.js'))
     .pipe(uglify())
     .pipe(gulp.dest(config.public + '/libs'))
+    .on('error', gutil.log)
 })
 
 // Html
 gulp.task('html', function() {
-  var opts = {}
   return gulp.src(config.src + 'html/*.html')
     .pipe(htmltemplate( { 
       debug: config.debug,
@@ -67,7 +63,7 @@ gulp.task('html', function() {
     }, {
       'interpolate': /{{([\s\S]+?)}}/g
     } ))
-    .pipe(htmlminify(opts))
+    .pipe(htmlminify())
     .pipe(gulp.dest(config.public))
 })
 
@@ -84,7 +80,7 @@ gulp.task('webpack:dev', function() {
     gutil.log('[webpack:dev]', stats.toString({
       colors: true
     }))
-    return gulp.src(config.src + 'js')
+    //return gulp.src(config.src + 'js')
   })
 })
 
