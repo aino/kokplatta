@@ -70,7 +70,9 @@ gulp.task('html', function() {
   return gulp.src(config.src + 'html/*.html')
     .pipe(htmltemplate( { 
       debug: config.debug,
-      appname: config.appname || 'Name your app'
+      appname: pjson.name || 'Name your app'
+    }, {
+      'interpolate': /{{([\s\S]+?)}}/g
     } ))
     .pipe(htmlminify(opts))
     .pipe(gulp.dest(config.public))
