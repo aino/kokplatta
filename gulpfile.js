@@ -1,7 +1,8 @@
 // Load plugins
+var path = require('path')
 var gulp = require('gulp')
 var gutil = require('gulp-util')
-//var sass = require('gulp-sass')
+var sass = require('gulp-sass');
 var autoprefixer = require('gulp-autoprefixer')
 var minifycss = require('gulp-minify-css')
 var uglify = require('gulp-uglify')
@@ -9,7 +10,6 @@ var imagemin = require('gulp-imagemin')
 var rename = require('gulp-rename')
 var clean = require('gulp-clean')
 var concat = require('gulp-concat')
-//var notify = require('gulp-notify')
 var cache = require('gulp-cache')
 var supervisor = require('gulp-supervisor')
 var shell = require('shelljs')
@@ -17,47 +17,51 @@ var pjson = require('./package.json')
 var svgsprites = require('gulp-svg-sprites')
 var htmltemplate = require('gulp-template')
 var htmlminify = require('gulp-minify-html')
+var webpack = require('webpack')
 
+// Configs
 var config = require('./conf/config')
+var wpconfig = require('./conf/webpack.config')
+var shims = ['es5-shim/es5-sham.js', 'es5-shim/es5-shim.js', 'html5shiv/dist/html5shiv.js']
 
-var nodeversion, nodepath, cwd
-
-if (!shell.which('n')) {
-  gutil.log('n not found. Please install it to enable node versioning.')
-  process.exit(1)
-} else {
+// Check if installed version of node is enough. Need =>0.11
+// Else, check if n is installed and use that
+var nodeversion = process.version
+var nodepath = ''
+if ( ~~nodeversion.match(/\d+\.(\d+)/)[1] > 10 ) {
+  nodepath = shell.which('node')
+  console.log('node');
+} else if (shell.which('n')) {
   nodeversion = pjson.engines.node
   nodepath = shell.exec( 'n bin ' + nodeversion ).output
-  cwd = shell.exec('pwd')
+} else {
+  gutil.log('n not found. Please install it to enable node versioning.')
+  process.exit(1)
 }
-
 
 // Styles
   gulp.task('styles', function() {
-    return gulp.src(config.src + 'css/*.css')
-     .pipe(concat('all.css'))
-     .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 4'))
+    return gulp.src(config.src + 'css/main.scss')
+     .pipe(sass({
+        includePaths: ['src/css']
+      }))
+     .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2'))
+     .pipe(rename({ extname: '.css' }))
      .pipe(gulp.dest(config.public + 'css'))
      .pipe(rename({ suffix: '.min' }))
      .pipe(minifycss())
      .pipe(gulp.dest(config.public + 'css'))
 })
- 
-// Scripts
-gulp.task('scripts', function() {
-  return gulp.src(config.src + 'js/*.js')
-    .pipe(concat('all.js'))
-    .pipe(gulp.dest(config.public + 'js'))
-    .pipe(rename({ suffix: '.min' }))
-    .pipe(uglify())
-    .pipe(gulp.dest(config.public + 'js'))
-})
 
-// Images
-gulp.task('images', function() {
-  return gulp.src(config.src + 'i/**/*')
-    .pipe(cache(imagemin({ optimizationLevel: 4, progressive: true, interlaced: true })))
-    .pipe(gulp.dest(config.public + 'i'))
+// Shims
+gulp.task('shims', function() {
+  var paths = shims.map(function(p) {
+    return path.resolve('bower_components', p)
+  })
+  return gulp.src(paths)
+    .pipe(concat('shims.min.js'))
+    .pipe(uglify())
+    .pipe(gulp.dest(config.public + '/libs'))
 })
 
 // Sprites
@@ -70,7 +74,7 @@ gulp.task('sprites', function () {
     className: '.icon-%f'
   }
   return gulp.src(config.src + 'svg/*.svg')
-    .pipe(svg(svgconfig))
+    .pipe(cache(svg(svgconfig)))
     .pipe(minifycss())
     .pipe(gulp.dest(config.public))
     .pipe(png())
@@ -82,7 +86,10 @@ gulp.task('sprites', function () {
 gulp.task('html', function() {
   var opts = {}
   return gulp.src(config.src + 'html/*.html')
-    .pipe(htmltemplate( { debug: config.debug } ))
+    .pipe(htmltemplate( { 
+      debug: config.debug,
+      appname: config.appname || 'Name your app'
+    } ))
     .pipe(htmlminify(opts))
     .pipe(gulp.dest(config.public))
 })
@@ -92,22 +99,26 @@ gulp.task('clean', function() {
   return gulp.src([config.public + 'html', config.public + 'css', config.public + 'js', config.public + 'i'], {read: false})
     .pipe(clean())
 })
- 
+
+// Webpack tasks
+gulp.task('webpack:dev', function() {
+  webpack(wpconfig, function(err, stats) {
+    if (err) throw new gutil.PluginError('webpack:dev', err)
+    gutil.log('[webpack:dev]', stats.toString({
+      colors: true
+    }))
+    return gulp.src(config.src + 'js')
+      //.pipe(livereload(server))
+  })
+})
+
 gulp.task('watch', function() {
-  // Watch .html files
+  gulp.watch([config.src + 'js/components/**/*.js', config.src + 'js/index.js'], ['webpack:dev'])
   gulp.watch(config.src + 'html/**/*.html', ['html'])
-
-  // Watch .css files
-  gulp.watch(config.src + 'css/**/*.css', ['styles'])
-
-  // Watch .svg files
+  gulp.watch(config.src + 'css/**/*.scss', ['styles'])
   gulp.watch(config.src + 'svg/**/*.svg', ['sprites'])
-
-  // Watch .js files
-  gulp.watch(config.src + 'js/**/*.js', ['scripts'])
-
-  // Watch image files
   gulp.watch(config.src + 'i/**/*', ['images'])
+  gulp.watch('gulpfile.js', ['build'])
 
 })
 
@@ -115,20 +126,20 @@ gulp.task( 'supervisor', function() {
   supervisor('server/app.js', {
     args: [],
     watch: [ '.' ],
-    ignore: [ 'node_modules', 'src' ],
-    //pollInterval: 500,
+    ignore: [ 'node_modules', 'bower_components', 'src', 'public' ],
     extensions: [ 'js', 'json' ],
-    //extensions: [ 'html|js|json' ],
     exec: nodepath,
     debug: true,
-    //debugBrk: false,
     harmony: true,
     noRestartOn: 'error',
-    //forceWatch: true,
     quiet: false
   } )
 } )
 
-gulp.task( 'default', ['clean', 'images', 'sprites', 'scripts', 'styles', 'html', 'watch', 'supervisor'], function () {
+gulp.task( 'build', ['clean', 'sprites', 'styles', 'webpack:dev', 'shims', 'html'], function () {
+  gutil.log( 'Build done' )
+})
+
+gulp.task( 'default', ['build', 'watch', 'supervisor'], function () {
   gutil.log( 'Running server on ' + config.port )
 })
