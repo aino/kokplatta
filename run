@@ -3,5 +3,5 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 NODE_VERSION=`node -e "console.log(require('./package').engines)"`
 
-cd ${DIR}/server
-../node_modules/.bin/supervisor -x "`n bin $NODE_VERSION`" --harmony -n error -i "node_modules" -e "html|js|json" app.js
+cd ${DIR}
+./node_modules/.bin/supervisor -x "`n bin $NODE_VERSION`" --harmony -n error -i "node_modules" -e "html|js|json" ./server/app.js

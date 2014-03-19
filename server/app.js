@@ -1,17 +1,21 @@
 var koa = require('koa')
+
+var app = koa()
+  , bodyParser = require('koa-body-parser')
+  , compress = require('koa-compress')
+  , config = require('../conf/config')
   , logger = require('koa-logger')
   , route = require('koa-route')
-  , bodyParser = require('koa-body-parser')
   , serve = require('koa-static')
-  , app = module.exports = koa()
-  , config = require('../conf/config')
+
 
 app.use(logger())
 app.use(bodyParser())
+app.use(compress())
 app.use(serve('../public/'))
 
 app.use(route.get('/test', function*(){
-  this.body = 'hello'
+  this.body = "test"
 }))
 
 
