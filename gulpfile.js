@@ -39,11 +39,11 @@ if ( ~~nodeversion.match(/\d+\.(\d+)/)[1] > 10 ) {
 gulp.task('styles', function() {
   return gulp.src(config.src + 'css/main.css')
    .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2'))
-   //.pipe(rename({ extname: '.css' }))
+   .pipe(rename({ extname: '.css' }))
    .pipe(gulp.dest(config.public + 'css'))
-   //.pipe(rename({ suffix: '.min' }))
-   //.pipe(minifycss())
-   //.pipe(gulp.dest(config.public + 'css'))
+   .pipe(rename({ suffix: '.min' }))
+   .pipe(minifycss())
+   .pipe(gulp.dest(config.public + 'css'))
 })
 
 // Shims
@@ -79,6 +79,7 @@ gulp.task('clean', function() {
 
 // Webpack tasks
 gulp.task('webpack:dev', function() {
+  console.log('packing...')
   webpack(wpconfig, function(err, stats) {
     if (err) throw new gutil.PluginError('webpack:dev', err)
     gutil.log('[webpack:dev]', stats.toString({
@@ -89,7 +90,7 @@ gulp.task('webpack:dev', function() {
 })
 
 gulp.task('watch', function() {
-  gulp.watch([config.src + 'js/components/**/*.js', config.src + 'js/index.js', 'conf/webpack.config.js'], ['webpack:dev'])
+  gulp.watch([config.src + 'js/**/*', 'conf/webpack.config.js'], ['webpack:dev'])
   gulp.watch(config.src + 'html/**/*.html', ['html'])
   gulp.watch(config.src + 'css/**/*.scss', ['styles'])
   gulp.watch(config.src + 'i/**/*', ['images'])
