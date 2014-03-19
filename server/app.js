@@ -8,7 +8,7 @@ var koa = require('koa')
 
 app.use(logger())
 app.use(bodyParser())
-app.use(serve('../public/'))
+app.use(serve( config.public ))
 
 app.use(route.get('/test', function*(){
   this.body = 'hello'

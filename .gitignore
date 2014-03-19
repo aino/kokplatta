@@ -8,5 +8,6 @@
 *.pyc
 node_modules
 bower_components
+public
 public/build/*
 !public/build/.placeholder
