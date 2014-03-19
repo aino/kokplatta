@@ -5,13 +5,12 @@ var config = require('./config')
 module.exports = {
   cache: true,
   target: 'web',
-  debug: config.debug,
+  debug: false,//config.debug,
   watch: false,
   entry: {
       main: path.resolve( config.src + 'js/index.jsx' )
   },
   output: {
-    //path: path.join(__dirname, config.public + 'js/'),
     path: path.resolve( config.public + 'js/' ),
     publicPath: '/js/',
     filename: 'all.bundle.js'
@@ -21,13 +20,12 @@ module.exports = {
   },
   module: {
     loaders: [
-      { test: /react\/react\.js$/, loader: 'script-loader' },
-      { test: /jquery\/jquery\.js$/, loader: 'script-loader' },
-      { test: /\.jsx$/, loader: 'jsx-loader' }
+      { test: /\.jsx$/, loader: 'jsx' },
+      { test: /\.js$/, loader: 'script' }
     ],
     noParse: /\.min\.js/
   },
   plugins: [
-    //new webpack.optimize.UglifyJsPlugin()
+    new webpack.optimize.UglifyJsPlugin({minimize:true})
   ]
 }
