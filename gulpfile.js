@@ -13,13 +13,13 @@ var concat = require('gulp-concat')
 var cache = require('gulp-cache')
 var supervisor = require('gulp-supervisor')
 var shell = require('shelljs')
-var pjson = require('./package.json')
 var svgsprites = require('gulp-svg-sprites')
 var htmltemplate = require('gulp-template')
 var htmlminify = require('gulp-minify-html')
 var webpack = require('webpack')
 
 // Configs
+var pjson = require('./package.json')
 var config = require('./conf/config')
 var wpconfig = require('./conf/webpack.config')
 var shims = ['es5-shim/es5-sham.js', 'es5-shim/es5-shim.js', 'html5shiv/dist/html5shiv.js']
@@ -64,24 +64,6 @@ gulp.task('shims', function() {
     .pipe(gulp.dest(config.public + '/libs'))
 })
 
-// Sprites
-gulp.task('sprites', function () {
-  var svg = svgsprites.svg
-  var png = svgsprites.png
-  var svgconfig = {
-    cssFile: 'css/sprites.css',
-    svgFile: 'i/sprites.svg',
-    className: '.icon-%f'
-  }
-  return gulp.src(config.src + 'svg/*.svg')
-    .pipe(cache(svg(svgconfig)))
-    .pipe(minifycss())
-    .pipe(gulp.dest(config.public))
-    .pipe(png())
-    .pipe(cache(imagemin({ optimizationLevel: 4 })))
-    .pipe(gulp.dest(config.public))
-})
-
 // Html
 gulp.task('html', function() {
   var opts = {}
@@ -108,7 +90,6 @@ gulp.task('webpack:dev', function() {
       colors: true
     }))
     return gulp.src(config.src + 'js')
-      //.pipe(livereload(server))
   })
 })
 
@@ -136,7 +117,7 @@ gulp.task( 'supervisor', function() {
   } )
 } )
 
-gulp.task( 'build', ['clean', 'sprites', 'styles', 'webpack:dev', 'shims', 'html'], function () {
+gulp.task( 'build', ['clean', 'webpack:dev', 'styles', 'shims', 'html'], function () {
   gutil.log( 'Build done' )
 })
 
