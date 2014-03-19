@@ -2,18 +2,15 @@
 var path = require('path')
 var gulp = require('gulp')
 var gutil = require('gulp-util')
-var sass = require('gulp-sass');
 var autoprefixer = require('gulp-autoprefixer')
 var minifycss = require('gulp-minify-css')
 var uglify = require('gulp-uglify')
-var imagemin = require('gulp-imagemin')
 var rename = require('gulp-rename')
 var clean = require('gulp-clean')
 var concat = require('gulp-concat')
 var cache = require('gulp-cache')
 var supervisor = require('gulp-supervisor')
 var shell = require('shelljs')
-var svgsprites = require('gulp-svg-sprites')
 var htmltemplate = require('gulp-template')
 var htmlminify = require('gulp-minify-html')
 var webpack = require('webpack')
@@ -40,17 +37,14 @@ if ( ~~nodeversion.match(/\d+\.(\d+)/)[1] > 10 ) {
 }
 
 // Styles
-  gulp.task('styles', function() {
-    return gulp.src(config.src + 'css/main.scss')
-     .pipe(sass({
-        includePaths: ['src/css']
-      }))
-     .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2'))
-     .pipe(rename({ extname: '.css' }))
-     .pipe(gulp.dest(config.public + 'css'))
-     .pipe(rename({ suffix: '.min' }))
-     .pipe(minifycss())
-     .pipe(gulp.dest(config.public + 'css'))
+gulp.task('styles', function() {
+  return gulp.src(config.src + 'css/main.css')
+   .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2'))
+   .pipe(rename({ extname: '.css' }))
+   .pipe(gulp.dest(config.public + 'css'))
+   .pipe(rename({ suffix: '.min' }))
+   .pipe(minifycss())
+   .pipe(gulp.dest(config.public + 'css'))
 })
 
 // Shims
@@ -107,8 +101,7 @@ gulp.task('watch', function() {
 gulp.task( 'supervisor', function() {
   supervisor('server/app.js', {
     args: [],
-    watch: [ '.' ],
-    ignore: [ 'node_modules', 'bower_components', 'src', 'public' ],
+    watch: [ 'node_modules', 'server', 'conf' ],
     extensions: [ 'js', 'json' ],
     exec: nodepath,
     debug: true,

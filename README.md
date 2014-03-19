@@ -5,6 +5,6 @@ Boilerplate code for next gen web apps!
 
 ```
 $ n 0.11
-$ [sudo] npm install && bower install
-$ gulp
+$ [sudo] npm install && ./node_modules/.bin/bower install
+$ ./node_modules/.bin/gulp
 ```
