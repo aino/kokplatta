@@ -5,10 +5,10 @@ var config = require('./config')
 module.exports = {
   cache: true,
   target: 'web',
-  debug: config.debug,
+  debug: false,//config.debug,
   watch: false,
   entry: {
-      main: path.resolve( config.src + 'js/index.js' )
+      main: path.resolve( config.src + 'js/index.jsx' )
   },
   output: {
       path: config.public + 'js/',
@@ -19,11 +19,12 @@ module.exports = {
   },
   module: {
     loaders: [
-      { test: /\.js$/, loader: 'jsx-loader' }
+      { test: /\.jsx$/, loader: 'jsx-loader' },
+      { test: /\.js$/, loader: 'script' }
     ],
     noParse: /\.min\.js/
   },
   plugins: [
-    //new webpack.optimize.UglifyJsPlugin()
+    //new webpack.optimize.UglifyJsPlugin({minimize:true})
   ]
 }
