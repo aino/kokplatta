@@ -13,13 +13,12 @@ var supervisor = require('gulp-supervisor')
 var shell = require('shelljs')
 var htmltemplate = require('gulp-template')
 var htmlminify = require('gulp-minify-html')
-var browserify = require('gulp-browserify');
+var browserify = require('gulp-browserify')
 
 // Configs
 var pjson = require('./package.json')
 var config = require('./conf/config')
 var shims = ['es5-shim/es5-shim.js', 'html5shiv/dist/html5shiv.js']
-var libs = ['react', 'jquery', 'underscore', 'backbone']
 
 // Check if installed version of node is enough. Need >=0.11
 // Else, check if n is installed and use that
@@ -76,8 +75,8 @@ gulp.task('clean', function() {
 // Build external libs with browserify
 gulp.task('browserify:libs', function() {
   gutil.log('Building libs');
-  gulp.src( config.src + 'js/index.js', { read: false } )
-    .pipe(browserify( { transform: ['reactify'], require: libs } ))
+  gulp.src( config.src + 'js/libs.js', { read: false } )
+    .pipe(browserify( { require: config.libs } ))
     .pipe(rename('libs.bundle.js'))
     .pipe(uglify())
     .pipe(gulp.dest(config.public + 'js'))
@@ -90,7 +89,7 @@ gulp.task('browserify:libs', function() {
 gulp.task('browserify:app', function() {
   gutil.log('Building app');
   gulp.src( config.src + 'js/index.js', { read: false } )
-    .pipe(browserify( { transform: ['reactify'], external: libs } ))
+    .pipe(browserify( { transform: ['reactify'], external: config.libs, debug: true } ))
     .pipe(rename('app.bundle.js'))
     .pipe(gulp.dest(config.public + 'js'))
     .on('error', function() {

@@ -1,6 +1,6 @@
 {
-
   "global": {
+    "libs": ["react", "jquery", "underscore", "backbone"]
   },
 
   "production": {
