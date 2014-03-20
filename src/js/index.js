@@ -2,13 +2,37 @@
 
 var React = require('react')
 var $ = require('jquery')
-var _ = require('underscore')
-var backbone = require('backbone')
-var animate = require('../../bower_components/ainojs/animate')
+var Backbone = require('backbone')
+var Router = require('./router.js')
+var AppComponent = require('./components/app.js')
 
-var AppComponent = require('./components/app')
-var App = AppComponent({
-  greeting: 'world'
+Backbone.$ = $
+
+// example data entry
+var Model = Backbone.Model.extend({})
+var example = new Model()
+
+// collections of backbone models/collections
+var data = { example: example }
+
+// pass the data to the app
+var App = AppComponent({ data: data })
+
+// render the app
+React.renderComponent(App, document.getElementById('app'))
+
+// start router
+Router.on('route', function(url, params) {
+
+  // Do the data APIs based on URLS and inject into Backbone
+  // The App will listen to all backbone changes and update the interface accordingly
+  example.set('greeting','World')
+
+  App.setState({ 
+    url: url, 
+    urlParams: params || [] 
+  })
+
 })
 
-React.renderComponent(App, document.getElementById('app'))
+Backbone.history.start()
