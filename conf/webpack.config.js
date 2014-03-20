@@ -1,19 +1,23 @@
 var path = require("path");
-var webpack = require("webpack");
+var webpack = require("webpack")
 var config = require('./config')
+var _ = require('underscore')
 
-module.exports = {
+var app = {
   cache: true,
   target: 'web',
   debug: config.debug,
   watch: false,
   entry: {
-      main: path.resolve( config.src + 'js/index.js' )
+      app: path.resolve( config.src + 'js/index.js' )  
   },
   output: {
       path: config.public + 'js/',
+      publicPath: '/js/',
       filename: 'app.bundle.js',
-      sourceMapFilename: 'app.bundle.map'
+      chunkFilename: 'lib.bundle.js',
+      sourceMapFilename: 'app.bundle.map',
+      jsonpFunction: 'Load'
   },
   devtool: 'source-map',
   resolve: {
@@ -24,11 +28,12 @@ module.exports = {
       { test: /\.js$/, loader: 'jsx-loader' }
     ],
     noParse: [
-      /\.min\.js$/,
-      /\jquery/
+      /\.min\.js$/
     ]
   },
   plugins: [
-    //new webpack.optimize.UglifyJsPlugin({minimize:true})
+    //new webpack.IgnorePlugin(new RegExp("^(" + config.libs.join('|') + ")$"))
   ]
 }
+
+module.exports = { app: app }

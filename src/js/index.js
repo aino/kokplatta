@@ -1,12 +1,16 @@
 /** @jsx React.DOM */
 
-var React = require('react')
-var $ = require('jquery')
+require.ensure(['react','jquery'], function() {
 
-var AppComponent = require('./components/app.js')
+  var React = require('react')
+  var $ = require('jquery')
 
-var App = AppComponent({
-  greeting: 'World'
+  var AppComponent = require('./components/app.js')
+
+  var App = AppComponent({
+    greeting: 'World'
+  })
+
+  React.renderComponent(App, document.getElementById('app'))
+
 })
-
-React.renderComponent(App, document.getElementById('app'))

@@ -54,7 +54,7 @@ gulp.task('shims', function() {
   return gulp.src(paths)
     .pipe(concat('shims.min.js'))
     .pipe(uglify())
-    .pipe(gulp.dest(config.public + '/libs'))
+    .pipe(gulp.dest(config.public + 'js'))
 })
 
 // Html
@@ -78,11 +78,11 @@ gulp.task('clean', function() {
 })
 
 // Webpack tasks
-gulp.task('webpack:dev', function() {
-  console.log('packing...')
-  webpack(wpconfig, function(err, stats) {
-    if (err) throw new gutil.PluginError('webpack:dev', err)
-    gutil.log('[webpack:dev]', stats.toString({
+
+gulp.task('webpack:app', function() {
+  webpack(wpconfig.app, function(err, stats) {
+    if (err) throw new gutil.PluginError('webpack:app', err)
+    gutil.log('[webpack:app]', stats.toString({
       colors: true
     }))
     return gulp.src(config.src + 'js')
@@ -90,7 +90,7 @@ gulp.task('webpack:dev', function() {
 })
 
 gulp.task('watch', function() {
-  gulp.watch([config.src + 'js/**/*', 'conf/webpack.config.js'], ['webpack:dev'])
+  gulp.watch([config.src + 'js/**/*.js', 'conf/webpack.config.js'], ['webpack:app'])
   gulp.watch(config.src + 'html/**/*.html', ['html'])
   gulp.watch(config.src + 'css/**/*.scss', ['styles'])
   gulp.watch(config.src + 'i/**/*', ['images'])
@@ -110,7 +110,7 @@ gulp.task( 'supervisor', function() {
   } )
 } )
 
-gulp.task( 'build', ['clean', 'webpack:dev', 'styles', 'shims', 'html'], function () {
+gulp.task( 'build', ['clean', 'webpack:app', 'shims', 'styles', 'html'], function () {
   gutil.log( 'Build done' )
 })
 
