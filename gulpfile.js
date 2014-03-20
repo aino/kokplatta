@@ -48,9 +48,9 @@ gulp.task('shims', function() {
     return path.resolve('bower_components', p)
   })
   return gulp.src(paths)
-    .pipe(concat('shims.min.js'))
+    .pipe(concat('shims.bundle.js'))
     .pipe(uglify())
-    .pipe(gulp.dest(config.public + 'js'))
+    .pipe(gulp.dest(config.public + 'libs'))
 })
 
 // Html
@@ -78,23 +78,32 @@ gulp.task('browserify:libs', function() {
   gutil.log('Building libs');
   gulp.src( config.src + 'js/index.js', { read: false } )
     .pipe(browserify( { transform: ['reactify'], require: libs } ))
-    .pipe(rename('libs.bundle.js'))
+    .pipe(rename('core.bundle.js'))
     .pipe(uglify())
-    .pipe(gulp.dest(config.public + 'js'))
+    .pipe(gulp.dest(config.public + 'libs'))
     .on('error', function() {
-      gutil.log('Error building libs')
+      gutil.log('Error building libs.')
     })
 });
 
 // Build app
 gulp.task('browserify:app', function() {
-  gutil.log('Building app');
+  gutil.log('Building app', __dirname);
   gulp.src( config.src + 'js/index.js', { read: false } )
-    .pipe(browserify( { transform: ['reactify'], external: libs } ))
+    .pipe(browserify( { 
+      transform: ['reactify'], 
+      external: libs, 
+      paths: [ 
+        config.src + 'js/'
+      ] } ))
     .pipe(rename('app.bundle.js'))
     .pipe(gulp.dest(config.public + 'js'))
+    // .on('prebundle', function( bundle ) {
+    //   // Until we get aliasMapping, this will have to do
+    //   bundle.require(__dirname + '/bower_components/**/*', { expose: 'bower' });
+    // })
     .on('error', function() {
-      gutil.log('Error when building app')
+      gutil.log('Error building app.')
     })
 });
 
@@ -120,11 +129,11 @@ gulp.task( 'supervisor', function() {
 } )
 
 gulp.task( 'build:app', ['browserify:app', 'styles', 'html'], function () {
-  gutil.log( 'Build done' )
+  gutil.log( 'App: Build done' )
 })
 
 gulp.task( 'build:libs', ['shims', 'browserify:libs'], function () {
-  gutil.log( 'Build done' )
+  gutil.log( 'Libs: Build done' )
 })
 
 gulp.task( 'default', ['clean', 'build:libs', 'build:app', 'watch', 'supervisor'], function () {
