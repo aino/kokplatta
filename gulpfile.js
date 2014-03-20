@@ -36,9 +36,11 @@ if ( ~~nodeversion.match(/\d+\.(\d+)/)[1] > 10 ) {
 
 // Styles
 gulp.task('styles', function() {
-  return gulp.src(config.src + 'css/main.css')
-   .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2'))
-   .pipe(gulp.dest(config.public + 'css'))
+  return gulp.src(['./bower_components/normalize-css/normalize.css', config.src + 'css/main.css'])
+    .pipe(concat('styles.min.css'))
+    .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2'))
+    .pipe(minifycss())
+    .pipe(gulp.dest(config.public + 'css'))
 })
 
 // Shims
@@ -91,6 +93,7 @@ gulp.task('browserify:app', function() {
   gulp.src( config.src + 'js/index.js', { read: false } )
     .pipe(browserify( { transform: ['reactify'], external: config.libs, debug: true } ))
     .pipe(rename('app.bundle.js'))
+    .pipe(uglify())
     .pipe(gulp.dest(config.public + 'js'))
     .on('error', function() {
       gutil.log('Error when building app')
@@ -100,7 +103,7 @@ gulp.task('browserify:app', function() {
 gulp.task('watch', function() {
   gulp.watch(config.src + 'js/**/*.js', ['browserify:app'])
   gulp.watch(config.src + 'html/**/*.html', ['html'])
-  gulp.watch(config.src + 'css/**/*.scss', ['styles'])
+  gulp.watch(config.src + 'css/**/*.css', ['styles'])
   gulp.watch(config.src + 'i/**/*', ['images'])
   gulp.watch('gulpfile.js', ['build:libs', 'build:app'])
 })
