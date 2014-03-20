@@ -5,8 +5,6 @@ var $ = require('jquery')
 var _ = require('underscore')
 var backbone = require('backbone')
 
-//console.log(_);
-
 var AppComponent = require('./components/app.js')
 var App = AppComponent({
   greeting: 'world'

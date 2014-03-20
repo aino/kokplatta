@@ -103,7 +103,7 @@ gulp.task('watch', function() {
   gulp.watch(config.src + 'html/**/*.html', ['html'])
   gulp.watch(config.src + 'css/**/*.scss', ['styles'])
   gulp.watch(config.src + 'i/**/*', ['images'])
-  gulp.watch('gulpfile.js', ['build'])
+  gulp.watch('gulpfile.js', ['build:libs', 'build:app'])
 })
 
 gulp.task( 'supervisor', function() {
