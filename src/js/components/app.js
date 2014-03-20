@@ -1,7 +1,8 @@
-/*** @jsx React.DOM */
+/** @jsx React.DOM */
 
-var App = React.createClass({
+var React = require('react')
 
+module.exports = React.createClass({
   render: function() {
     var greeting = this.props.greeting || 'world'
     return (
@@ -9,5 +10,3 @@ var App = React.createClass({
     )
   }
 })
-
-module.exports = App

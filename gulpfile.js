@@ -13,15 +13,15 @@ var supervisor = require('gulp-supervisor')
 var shell = require('shelljs')
 var htmltemplate = require('gulp-template')
 var htmlminify = require('gulp-minify-html')
-var webpack = require('webpack')
+var browserify = require('gulp-browserify');
 
 // Configs
 var pjson = require('./package.json')
 var config = require('./conf/config')
-var wpconfig = require('./conf/webpack.config')
-var shims = ['es5-shim/es5-sham.js', 'es5-shim/es5-shim.js', 'html5shiv/dist/html5shiv.js']
+var shims = ['es5-shim/es5-shim.js', 'html5shiv/dist/html5shiv.js']
+var libs = ['react', 'jquery', 'underscore', 'backbone']
 
-// Check if installed version of node is enough. Need =>0.11
+// Check if installed version of node is enough. Need >=0.11
 // Else, check if n is installed and use that
 var nodeversion = process.version
 var nodepath = ''
@@ -38,8 +38,8 @@ if ( ~~nodeversion.match(/\d+\.(\d+)/)[1] > 10 ) {
 // Styles
 gulp.task('styles', function() {
   return gulp.src(config.src + 'css/main.css')
-    .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2'))
-    .pipe(gulp.dest(config.public + 'css'))
+   .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2'))
+   .pipe(gulp.dest(config.public + 'css'))
 })
 
 // Shims
@@ -50,12 +50,12 @@ gulp.task('shims', function() {
   return gulp.src(paths)
     .pipe(concat('shims.min.js'))
     .pipe(uglify())
-    .pipe(gulp.dest(config.public + '/libs'))
-    .on('error', gutil.log)
+    .pipe(gulp.dest(config.public + 'js'))
 })
 
 // Html
 gulp.task('html', function() {
+  var opts = {}
   return gulp.src(config.src + 'html/*.html')
     .pipe(htmltemplate( { 
       debug: config.debug,
@@ -63,7 +63,7 @@ gulp.task('html', function() {
     }, {
       'interpolate': /{{([\s\S]+?)}}/g
     } ))
-    .pipe(htmlminify())
+    .pipe(htmlminify(opts))
     .pipe(gulp.dest(config.public))
 })
 
@@ -73,19 +73,33 @@ gulp.task('clean', function() {
     .pipe(clean())
 })
 
-// Webpack tasks
-gulp.task('webpack:dev', function() {
-  webpack(wpconfig, function(err, stats) {
-    if (err) throw new gutil.PluginError('webpack:dev', err)
-    gutil.log('[webpack:dev]', stats.toString({
-      colors: true
-    }))
-    //return gulp.src(config.src + 'js')
-  })
-})
+// Build external libs with browserify
+gulp.task('browserify:libs', function() {
+  gutil.log('Building libs');
+  gulp.src( config.src + 'js/index.js', { read: false } )
+    .pipe(browserify( { transform: ['reactify'], require: libs } ))
+    .pipe(rename('libs.bundle.js'))
+    .pipe(uglify())
+    .pipe(gulp.dest(config.public + 'js'))
+    .on('error', function() {
+      gutil.log('Error building libs')
+    })
+});
+
+// Build app
+gulp.task('browserify:app', function() {
+  gutil.log('Building app');
+  gulp.src( config.src + 'js/index.js', { read: false } )
+    .pipe(browserify( { transform: ['reactify'], external: libs } ))
+    .pipe(rename('app.bundle.js'))
+    .pipe(gulp.dest(config.public + 'js'))
+    .on('error', function() {
+      gutil.log('Error when building app')
+    })
+});
 
 gulp.task('watch', function() {
-  gulp.watch([config.src + 'js/components/**/*.js', config.src + 'js/index.js', 'conf/webpack.config.js'], ['webpack:dev'])
+  gulp.watch(config.src + 'js/**/*.js', ['browserify:app'])
   gulp.watch(config.src + 'html/**/*.html', ['html'])
   gulp.watch(config.src + 'css/**/*.scss', ['styles'])
   gulp.watch(config.src + 'i/**/*', ['images'])
@@ -105,10 +119,14 @@ gulp.task( 'supervisor', function() {
   } )
 } )
 
-gulp.task( 'build', ['clean', 'webpack:dev', 'styles', 'shims', 'html'], function () {
+gulp.task( 'build:app', ['browserify:app', 'styles', 'html'], function () {
   gutil.log( 'Build done' )
 })
 
-gulp.task( 'default', ['build', 'watch', 'supervisor'], function () {
+gulp.task( 'build:libs', ['shims', 'browserify:libs'], function () {
+  gutil.log( 'Build done' )
+})
+
+gulp.task( 'default', ['clean', 'build:libs', 'build:app', 'watch', 'supervisor'], function () {
   gutil.log( 'Running server on ' + config.port )
 })

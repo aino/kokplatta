@@ -1,6 +1,5 @@
 var _ = require('underscore')
-  , configs = require('./config.json')
-
+var configs = require('./config.json')
 
 var env = process.env.NODE_ENV || 'development'
 var config = _.clone(configs.global)

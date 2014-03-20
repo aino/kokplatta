@@ -1,31 +1,41 @@
 var path = require('path');
-var webpack = require('webpack');
+var webpack = require('webpack')
 var config = require('./config')
+var _ = require('underscore')
 
-module.exports = {
+var app = {
   cache: true,
   target: 'web',
-  debug: false,//config.debug,
+  debug: config.debug,
   watch: false,
   entry: {
-      main: path.resolve( config.src + 'js/index.jsx' )
+      app: path.resolve( config.src + 'js/index.js' ),
+      'commons.js': path.resolve( config.src + 'js/init.js' )
   },
   output: {
-    path: path.resolve( config.public + 'js/' ),
-    publicPath: '/js/',
-    filename: 'all.bundle.js'
+      path: path.resolve( config.public + 'js/' ),
+      publicPath: '/js/',
+      filename: 'app.bundle.js',
+      //chunkFilename: 'lib.bundle.js',
+      //sourceMapFilename: 'app.bundle.map',
+      //jsonpFunction: 'Load'
   },
+  //devtool: 'source-map',
   resolve: {
-    modulesDirectories: ['bower_components', 'src/js']
+    modulesDirectories: ['bower_components', 'node_modules', 'src/js']
   },
   module: {
     loaders: [
-      { test: /\.jsx$/, loader: 'jsx' },
-      { test: /\.js$/, loader: 'script' }
+      { test: /\.js$/, loader: 'jsx-loader' }
     ],
-    noParse: /\.min\.js/
+    noParse: [
+      /\.min\.js$/
+    ]
   },
   plugins: [
-    new webpack.optimize.UglifyJsPlugin({minimize:true})
+    //new webpack.IgnorePlugin(new RegExp("^(" + config.libs.join('|') + ")$"))
+    new webpack.optimize.CommonsChunkPlugin('commons.js')
   ]
 }
+
+module.exports = { app: app }
