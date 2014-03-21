@@ -16,7 +16,10 @@
       var s=this.readyState
       if( !this.l && ( !s || s=='loaded' || s=='complete' ) ) {
         this.l=1;
-        ++O == N.length ? Run() : b()
+        ++O == N.length ? (function() {
+          if (d.readyState && d.readyState === "complete") Run()
+          else window.onload = Run
+        }()) : b()
       }
     }
   }
