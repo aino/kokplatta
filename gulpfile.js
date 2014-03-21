@@ -55,7 +55,7 @@ gulp.task('clean', function() {
     .pipe(clean())
 })
 
-// Build external libs with browserify
+// Build lib css+js
 gulp.task('bundle:libs', function() {
 
   gutil.log('Building libs')
@@ -136,6 +136,6 @@ gulp.task( 'build:libs', ['bundle:libs'], function () {
   gutil.log( 'Build done' )
 })
 
-gulp.task( 'default', ['clean', 'build:libs', 'build:app', 'watch', 'supervisor'], function () {
+gulp.task( 'default', ['build:app', 'watch', 'supervisor'], function () {
   gutil.log( 'Running server on ' + config.port )
 })
