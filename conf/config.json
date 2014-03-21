@@ -1,16 +1,17 @@
 {
   "global": {
-    "libs": ["react", "jquery", "underscore", "backbone"]
+    "libs": ["react", "jquery", "underscore", "backbone"],
+    "bowerlibs": ["es5-shim/es5-shim.js", "html5shiv/dist/html5shiv.js"],
+    "bowerstyles": ["normalize-css/normalize.css"]
   },
 
   "production": {
   },
 
   "development": {
-      "port": 8000,
-      "src": "src/",
-      "public": "public/",
-      "debug": true
+    "port": 8000,
+    "src": "src/",
+    "public": "public/",
+    "debug": true
   }
-
 }
