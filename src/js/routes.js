@@ -6,8 +6,9 @@ var ExampleModel = require('./models/example')
 
 module.exports = {
 
-  home: function() {
+  home: function(params, cb) {
     ExampleModel.set('greeting', 'World')
+    cb()
   },
 
   earth: function(params, cb) {
