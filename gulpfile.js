@@ -14,11 +14,12 @@ var shell = require('shelljs')
 var htmltemplate = require('gulp-template')
 var htmlminify = require('gulp-minify-html')
 var browserify = require('gulp-browserify')
+var less = require('gulp-less')
+var es = require('event-stream')
 
 // Configs
 var pjson = require('./package.json')
 var config = require('./conf/config')
-var shims = ['es5-shim/es5-shim.js', 'html5shiv/dist/html5shiv.js']
 
 // Check if installed version of node is enough. Need >=0.11
 // Else, check if n is installed and use that
@@ -33,26 +34,6 @@ if ( ~~nodeversion.match(/\d+\.(\d+)/)[1] > 10 ) {
   gutil.log('n not found. Please install it to enable node versioning.')
   process.exit(1)
 }
-
-// Styles
-gulp.task('styles', function() {
-  return gulp.src(['./bower_components/normalize-css/normalize.css', config.src + 'css/main.css'])
-    .pipe(concat('styles.min.css'))
-    .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2'))
-    .pipe(minifycss())
-    .pipe(gulp.dest(config.public + 'css'))
-})
-
-// Shims
-gulp.task('shims', function() {
-  var paths = shims.map(function(p) {
-    return path.resolve('bower_components', p)
-  })
-  return gulp.src(paths)
-    .pipe(concat('shims.min.js'))
-    .pipe(uglify())
-    .pipe(gulp.dest(config.public + 'js'))
-})
 
 // Html
 gulp.task('html', function() {
@@ -75,35 +56,61 @@ gulp.task('clean', function() {
 })
 
 // Build external libs with browserify
-gulp.task('browserify:libs', function() {
-  gutil.log('Building libs');
-  gulp.src( config.src + 'js/libs.js', { read: false } )
-    .pipe(browserify( { require: config.libs } ))
-    .pipe(rename('libs.bundle.js'))
-    .pipe(uglify())
-    .pipe(gulp.dest(config.public + 'js'))
-    .on('error', function() {
-      gutil.log('Error building libs')
-    })
-});
+gulp.task('bundle:libs', function() {
 
-// Build app
-gulp.task('browserify:app', function() {
-  gutil.log('Building app');
-  gulp.src( config.src + 'js/index.js', { read: false } )
-    .pipe(browserify( { transform: ['reactify'], external: config.libs, debug: true } ))
+  gutil.log('Building libs')
+  
+  var scriptpaths = [config.src + 'js/libs.js'].concat(config.bowerlibs.map(function(p) {
+    return path.resolve('bower_components', p)
+  }))
+  
+  var stylepaths = config.bowerstyles.map(function(p) {
+    return path.resolve('bower_components', p)
+  })
+
+  return es.concat(
+    gulp.src( scriptpaths, { read: false } )
+      .pipe(browserify( { require: config.libs } ))
+      .pipe(rename('libs.bundle.js'))
+      .pipe(uglify())
+      .pipe(gulp.dest(config.public + 'js')),
+    gulp.src( stylepaths )
+      .pipe(concat('lib.bundle.css'))
+      .pipe(minifycss())
+      .pipe(gulp.dest(config.public + 'css'))
+  )
+})
+
+// Build app js
+gulp.task('bundle:appscripts', function() {
+
+  gutil.log('Building app')
+  
+  return gulp.src( config.src + 'js/index.js', { read: false } )
+    .pipe( browserify({ 
+      transform: ['reactify', 'debowerify'], 
+      external: config.libs,
+      debug: true 
+    }) )
     .pipe(rename('app.bundle.js'))
     .pipe(uglify())
     .pipe(gulp.dest(config.public + 'js'))
-    .on('error', function() {
-      gutil.log('Error when building app')
-    })
-});
+})
+
+// Build app css
+gulp.task('bundle:appstyles', function() {
+  return gulp.src(config.src + 'css/app.css')
+    //.pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2')) // <!-- production
+    .pipe(less({ sourceMap: true, silent: true }))  // <-- development
+    .pipe(rename('app.bundle.css'))
+    //.pipe(minifycss()) // <-- production
+    .pipe(gulp.dest(config.public + 'css'))
+})
 
 gulp.task('watch', function() {
-  gulp.watch(config.src + 'js/**/*.js', ['browserify:app'])
+  gulp.watch(config.src + 'js/**/*.js', ['bundle:appscripts'])
   gulp.watch(config.src + 'html/**/*.html', ['html'])
-  gulp.watch(config.src + 'css/**/*.css', ['styles'])
+  gulp.watch(config.src + 'css/**/*.css', ['bundle:appstyles'])
   gulp.watch(config.src + 'i/**/*', ['images'])
   gulp.watch('gulpfile.js', ['build:libs', 'build:app'])
 })
@@ -121,11 +128,11 @@ gulp.task( 'supervisor', function() {
   } )
 } )
 
-gulp.task( 'build:app', ['browserify:app', 'styles', 'html'], function () {
+gulp.task( 'build:app', ['bundle:appscripts', 'bundle:appstyles', 'html'], function () {
   gutil.log( 'Build done' )
 })
 
-gulp.task( 'build:libs', ['shims', 'browserify:libs'], function () {
+gulp.task( 'build:libs', ['bundle:libs'], function () {
   gutil.log( 'Build done' )
 })
 
