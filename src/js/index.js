@@ -35,7 +35,12 @@ Backbone.history.start({pushState: true})
 
 // hijack links
 var openLinkInTab = false
-$(document).on('click', 'a', function(e) {
+$(document).keydown(function(e) {
+  if (e.ctrlKey || e.keyCode === 91)
+    openLinkInTab = true
+}).keyup(function() {
+  openLinkInTab = false
+}).on('click', 'a', function(e) {
   var href = $(this).attr('href')
   var protocol = this.protocol + '//'
   if (!openLinkInTab && href.slice(protocol.length) !== protocol) {

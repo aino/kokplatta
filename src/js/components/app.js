@@ -4,6 +4,13 @@ var React = require('react')
 
 module.exports = React.createClass({
 
+  getInitialState: function() {
+    return {
+      url: 'loading',
+      urlParams: []
+    }
+  },
+
   getDefaultProps: function() {
     return { data: [] }
   },
@@ -27,11 +34,15 @@ module.exports = React.createClass({
   },
 
   render: function() {
+
+    // text in red for the earth url state
+    var style = this.state.url == 'earth' ? {color: '#c44'} : {}
+
     return (
       <div>
         <a href="/">Home</a>&nbsp;
         <a href="/earth">Earth</a>
-        <h1>{'Hello '+this.props.data.example.get('greeting')}</h1>
+        <h1 style={style}>{'Hello '+this.props.data.example.get('greeting')}</h1>
       </div>
     )
   }
