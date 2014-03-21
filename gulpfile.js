@@ -66,12 +66,10 @@ gulp.task('bundle:libs', function() {
     return path.resolve('bower_components', p)
   })
 
-  console.log(scriptpaths)
-
   return es.concat(
     gulp.src( scriptpaths )
       .pipe(browserify( { require: config.libs } ))
-      .pipe(rename('libs.bundle.js'))
+      .pipe(rename('lib.bundle.js'))
       //.pipe(uglify())
       .pipe(gulp.dest(config.public + 'js')),
     gulp.src( stylepaths )
@@ -83,16 +81,23 @@ gulp.task('bundle:libs', function() {
 
 // Build app js
 gulp.task('bundle:appscripts', function() {
-  
-  return gulp.src( config.src + 'js/index.js', { read: false } )
-    .pipe( browserify({ 
-      transform: ['reactify', 'debowerify'], 
-      external: config.libs,
-      debug: true 
-    }) )
-    .pipe(rename('app.bundle.js'))
-    //.pipe(uglify())
-    .pipe(gulp.dest(config.public + 'js'))
+
+  return es.concat(
+    gulp.src( config.src + 'js/index.js', { read: false } )
+      .pipe(browserify({ 
+        transform: ['reactify', 'debowerify'], 
+        external: config.libs,
+        debug: true 
+      }))
+      .pipe(rename('app.bundle.js'))
+      //.pipe(uglify())
+      .pipe(gulp.dest(config.public + 'js')),
+    gulp.src( config.src + 'js/loader.js' )
+      .pipe(rename('aino.js'))
+      .pipe(uglify({mangle:false}))
+      .pipe(gulp.dest( config.public + 'js' ))
+  )
+
 })
 
 // Build app css
