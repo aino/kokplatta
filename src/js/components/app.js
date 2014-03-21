@@ -28,7 +28,11 @@ module.exports = React.createClass({
 
   render: function() {
     return (
-      <h1>Hello {this.props.data.example.get('greeting')}!</h1>
+      <div>
+        <a href="/">Home</a>&nbsp;
+        <a href="/earth">Earth</a>
+        <h1>{'Hello '+this.props.data.example.get('greeting')}</h1>
+      </div>
     )
   }
 })

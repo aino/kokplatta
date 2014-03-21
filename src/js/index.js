@@ -3,17 +3,15 @@
 var React = require('react')
 var $ = require('jquery')
 var Backbone = require('backbone')
-var Router = require('./router.js')
-var AppComponent = require('./components/app.js')
+var Router = require('./router')
+var Routes = require('./routes')
+var AppComponent = require('./components/app')
+var ExampleModel = require('./models/example')
 
 Backbone.$ = $
 
-// example data entry
-var Model = Backbone.Model.extend({})
-var example = new Model()
-
 // collections of backbone models/collections
-var data = { example: example }
+var data = { example: ExampleModel }
 
 // pass the data to the app
 var App = AppComponent({ data: data })
@@ -23,16 +21,25 @@ React.renderComponent(App, document.getElementById('app'))
 
 // start router
 Router.on('route', function(url, params) {
-
-  // Do the data APIs based on URLS and inject into Backbone
-  // The App will listen to all backbone changes and update the interface accordingly
-  example.set('greeting','World')
-
-  App.setState({ 
-    url: url, 
-    urlParams: params || [] 
-  })
-
+  if ( Routes.hasOwnProperty(url) ) {
+    Routes[url](params, function() {
+      App.setState({ 
+        url: url, 
+        urlParams: params || [] 
+      })
+    })
+  }
 })
 
-Backbone.history.start()
+Backbone.history.start({pushState: true})
+
+// hijack links
+var openLinkInTab = false
+$(document).on('click', 'a', function(e) {
+  var href = $(this).attr('href')
+  var protocol = this.protocol + '//'
+  if (!openLinkInTab && href.slice(protocol.length) !== protocol) {
+    e.preventDefault()
+    Backbone.history.navigate(href, true)
+  }
+})

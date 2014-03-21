@@ -57,10 +57,8 @@ gulp.task('clean', function() {
 
 // Build lib css+js
 gulp.task('bundle:libs', function() {
-
-  gutil.log('Building libs')
   
-  var scriptpaths = [config.src + 'js/libs.js'].concat(config.bowerlibs.map(function(p) {
+  var scriptpaths = [config.src + 'js/_lib.js'].concat(config.bowerlibs.map(function(p) {
     return path.resolve('bower_components', p)
   }))
   
@@ -68,11 +66,13 @@ gulp.task('bundle:libs', function() {
     return path.resolve('bower_components', p)
   })
 
+  console.log(scriptpaths)
+
   return es.concat(
-    gulp.src( scriptpaths, { read: false } )
+    gulp.src( scriptpaths )
       .pipe(browserify( { require: config.libs } ))
       .pipe(rename('libs.bundle.js'))
-      .pipe(uglify())
+      //.pipe(uglify())
       .pipe(gulp.dest(config.public + 'js')),
     gulp.src( stylepaths )
       .pipe(concat('lib.bundle.css'))
@@ -83,8 +83,6 @@ gulp.task('bundle:libs', function() {
 
 // Build app js
 gulp.task('bundle:appscripts', function() {
-
-  gutil.log('Building app')
   
   return gulp.src( config.src + 'js/index.js', { read: false } )
     .pipe( browserify({ 
@@ -93,7 +91,7 @@ gulp.task('bundle:appscripts', function() {
       debug: true 
     }) )
     .pipe(rename('app.bundle.js'))
-    .pipe(uglify())
+    //.pipe(uglify())
     .pipe(gulp.dest(config.public + 'js'))
 })
 
