@@ -80,7 +80,6 @@ gulp.task('browserify:libs', function() {
   gulp.src( config.src + 'js/libs.js', { read: false } )
     .pipe(browserify( { require: config.libs } ))
     .pipe(rename('core.bundle.js'))
-
     .pipe(uglify())
     .pipe(gulp.dest(config.public + 'libs'))
     .on('error', function() {
@@ -90,7 +89,7 @@ gulp.task('browserify:libs', function() {
 
 // Build app
 gulp.task('browserify:app', function() {
-  gutil.log('Building app', __dirname);
+  gutil.log('Building app');
   gulp.src( config.src + 'js/index.js', { read: false } )
     .pipe(browserify( { transform: ['reactify'], external: config.libs, debug: true } ))
     .pipe(rename('app.bundle.js'))
