@@ -3,9 +3,10 @@ var logger = require('koa-logger')
 var route = require('koa-route')
 var bodyParser = require('koa-body-parser')
 var serve = require('koa-static')
-var app = module.exports = koa()
 var config = require('../conf/config')
 var fs = require('co-fs')
+
+var app = module.exports = koa()
 
 app.use(logger())
 app.use(bodyParser())

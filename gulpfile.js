@@ -1,4 +1,3 @@
-// Load plugins
 var path = require('path')
 var gulp = require('gulp')
 var gutil = require('gulp-util')
@@ -16,10 +15,31 @@ var htmlminify = require('gulp-minify-html')
 var browserify = require('gulp-browserify')
 var less = require('gulp-less')
 var es = require('event-stream')
+var glob = require('glob')
+var fs = require('fs')
 
-// Configs
 var pjson = require('./package.json')
 var config = require('./conf/config')
+
+
+// Echo to HTML
+var echo = function(obj) {
+  return gulp.src(config.src + 'html/*.html')
+    .pipe(htmltemplate(obj, {
+      'interpolate': /{{([\s\S]+?)}}/g
+    }))
+    .pipe(htmlminify(opts))
+    .pipe(gulp.dest(config.public))
+}
+
+// Raise error
+var raise = function(err) {
+  console.error(err.stack)
+  echo({ 
+    errmsg: '<pre>'+err.stack+'</pre>',
+    appname: 'Error'
+  })
+}
 
 // Check if installed version of node is enough. Need >=0.11
 // Else, check if n is installed and use that
@@ -175,16 +195,10 @@ if ( ~~nodeversion.match(/\d+\.(\d+)/)[1] > 10 ) {
 
 // Html
 gulp.task('html', function() {
-  var opts = {}
-  return gulp.src(config.src + 'html/*.html')
-    .pipe(htmltemplate( { 
-      debug: config.debug,
-      appname: pjson.name || 'Name your app'
-    }, {
-      'interpolate': /{{([\s\S]+?)}}/g
-    } ))
-    .pipe(htmlminify(opts))
-    .pipe(gulp.dest(config.public))
+  return echo({
+    errmsg: '',
+    appname: pjson.name || 'Name your app'
+  })
 })
 
 // Clean
@@ -204,12 +218,10 @@ gulp.task('bundle:libs', function() {
     return path.resolve('bower_components', p)
   })
 
-  console.log(scriptpaths)
-
   return es.concat(
     gulp.src( scriptpaths )
       .pipe(browserify( { require: config.libs } ))
-      .pipe(rename('libs.bundle.js'))
+      .pipe(rename('lib.bundle.js'))
       //.pipe(uglify())
       .pipe(gulp.dest(config.public + 'js')),
     gulp.src( stylepaths )
@@ -220,17 +232,25 @@ gulp.task('bundle:libs', function() {
 })
 
 // Build app js
-gulp.task('bundle:appscripts', function() {
-  
-  return gulp.src( config.src + 'js/index.js', { read: false } )
-    .pipe( browserify({ 
-      transform: ['reactify', 'debowerify'], 
-      external: config.libs,
-      debug: true 
-    }) )
-    .pipe(rename('app.bundle.js'))
-    //.pipe(uglify())
-    .pipe(gulp.dest(config.public + 'js'))
+gulp.task('bundle:appscripts', function(cb) {
+
+  return es.concat(
+    gulp.src( config.src + 'js/index.js', { read: false } )
+      .pipe(browserify({ 
+        transform: ['reactify', 'debowerify'], 
+        external: config.libs,
+        debug: true 
+      }))
+      .on('error', raise)
+      .pipe(rename('app.bundle.js'))
+      //.pipe(uglify())
+      .pipe(gulp.dest(config.public + 'js')),
+    gulp.src( config.src + 'js/loader.js' )
+      .pipe(rename('i'))
+      .pipe(uglify({mangle:false}))
+      .pipe(gulp.dest( config.public + 'js' ))
+  )
+
 })
 
 // Build app css
@@ -244,7 +264,7 @@ gulp.task('bundle:appstyles', function() {
 })
 
 gulp.task('watch', function() {
-  gulp.watch(config.src + 'js/**/*.js', ['bundle:appscripts'])
+  gulp.watch(config.src + 'js/**/*.js', ['bundle:appscripts', 'html'])
   gulp.watch(config.src + 'html/**/*.html', ['html'])
   gulp.watch(config.src + 'css/**/*.css', ['bundle:appstyles'])
   gulp.watch(config.src + 'i/**/*', ['images'])
@@ -264,7 +284,7 @@ gulp.task( 'supervisor', function() {
   } )
 } )
 
-gulp.task( 'build:app', ['bundle:appscripts', 'bundle:appstyles', 'html'], function () {
+gulp.task( 'build:app', ['html', 'bundle:appscripts', 'bundle:appstyles'], function () {
   gutil.log( 'Build done' )
 })
 
