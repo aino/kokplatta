@@ -1,7 +1,7 @@
 {
   "global": {
     "libs": ["react", "jquery", "underscore", "backbone"],
-    "bowerlibs": ["es5-shim/es5-shim.js", "html5shiv/dist/html5shiv.js"],
+    "bowerlibs": ["es5-shim/es5-shim.js", "es5-shim/es5-sham.js", "html5shiv/dist/html5shiv.js"],
     "bowerstyles": ["normalize-css/normalize.css"],
     "public": "public/"
   },

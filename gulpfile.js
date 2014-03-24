@@ -15,8 +15,7 @@ var htmlminify = require('gulp-minify-html')
 var browserify = require('gulp-browserify')
 var less = require('gulp-less')
 var es = require('event-stream')
-var glob = require('glob')
-var fs = require('fs')
+var streamqueue = require('streamqueue')
 
 var pjson = require('./package.json')
 var config = require('./conf/config')
@@ -210,18 +209,20 @@ gulp.task('clean', function() {
 // Build lib css+js
 gulp.task('bundle:libs', function() {
   
-  var scriptpaths = [config.src + 'js/_lib.js'].concat(config.bowerlibs.map(function(p) {
+  var scriptpaths = config.bowerlibs.map(function(p) {
     return path.resolve('bower_components', p)
-  }))
+  })
   
   var stylepaths = config.bowerstyles.map(function(p) {
     return path.resolve('bower_components', p)
   })
 
   return es.concat(
-    gulp.src( scriptpaths )
-      .pipe(browserify( { require: config.libs } ))
-      .pipe(rename('lib.bundle.js'))
+    streamqueue({ objectMode: true },
+      gulp.src(scriptpaths),
+      gulp.src(config.src + 'js/_lib.js').pipe(browserify( { require: config.libs } ))
+    )
+      .pipe(concat('lib.bundle.js'))
       //.pipe(uglify())
       .pipe(gulp.dest(config.public + 'js')),
     gulp.src( stylepaths )
