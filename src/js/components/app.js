@@ -12,15 +12,15 @@ module.exports = React.createClass({
   },
 
   getDefaultProps: function() {
-    return { data: [] }
+    return { models: {} }
   },
 
   componentDidMount: function() {
 
     // listen for backbone changes and force update
     // this makes the entire app reactive
-    for( var inst in this.props.data )
-      this.props.data[inst].on('add change remove reset', function() {
+    for( var inst in this.props.models )
+      this.props.models[inst].on('add change remove reset', function() {
         this.forceUpdate()
       }, this)
 
@@ -29,8 +29,8 @@ module.exports = React.createClass({
   componentWillUnmount: function() {
 
     // forget the backbone binding
-    for( var inst in this.props.data )
-      this.props.data[inst].off(null, null, this)
+    for( var inst in this.props.models )
+      this.props.models[inst].off(null, null, this)
   },
 
   render: function() {
@@ -42,7 +42,7 @@ module.exports = React.createClass({
       <div>
         <a href="/">Home</a>&nbsp;
         <a href="/earth">Earth</a>
-        <h1 style={style}>{'Hello '+this.props.data.example.get('greeting')}</h1>
+        <h1 style={style}>{'Hello '+this.props.models.example.get('greeting')}</h1>
       </div>
     )
   }

@@ -6,18 +6,15 @@ var Backbone = require('backbone')
 var Router = require('./router')
 var Routes = require('./routes')
 var AppComponent = require('./components/app')
-var ExampleModel = require('./models/example')
+var models = require('./models')
 
 Backbone.$ = $
 
 // expose a Run method instead of module for browser loader
 window.Run = function() {
 
-  // collections of backbone models/collections
-  var data = { example: ExampleModel }
-
   // pass the data to the app
-  var App = AppComponent({ data: data })
+  var App = AppComponent({ models: models })
 
   // render the app
   React.renderComponent(App, document.getElementById('app'))

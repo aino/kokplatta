@@ -13,7 +13,7 @@ app.use(bodyParser())
 app.use(serve( config.public ))
 
 app.use(route.get('/api/*', function*() {
-  this.body = 'api'
+  this.body = '{"greeting": "World"}'
 }))
 
 app.use(function*() {

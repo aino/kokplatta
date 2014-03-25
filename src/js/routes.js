@@ -2,20 +2,19 @@
 // The App will listen to all backbone changes and update the interface accordingly
 // You should call cb() when react should change it’s state
 
-var ExampleModel = require('./models/example')
+var models = require('./models')
+var Backbone = require('backbone')
 
 module.exports = {
 
   home: function(params, cb) {
-    ExampleModel.set('greeting', 'World')
-    cb()
+    models.example.fetch({
+      success: cb
+    })
   },
 
   earth: function(params, cb) {
-    ExampleModel.set('greeting', 'loading...')
-    setTimeout(function() {
-      ExampleModel.set('greeting', 'Earth')
-      cb()
-    },1000)
+    models.example.set('greeting', 'Earth')
+    cb()
   }
 }

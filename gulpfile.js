@@ -278,7 +278,7 @@ gulp.task( 'supervisor', function() {
     watch: [ 'node_modules', 'server', 'conf' ],
     extensions: [ 'js', 'json' ],
     exec: nodepath,
-    debug: true,
+    debug: false,
     harmony: true,
     noRestartOn: 'error',
     quiet: false
