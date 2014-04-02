@@ -93,7 +93,7 @@ gulp.task('clean', function() {
 // Build lib css+js
 gulp.task('bundle:libs', function() {
 
-  var corepath = path.resolve(config.src, 'js/_lib.js')
+  //var corepath = path.resolve(config.src, 'js/_lib.js')
   var scriptpaths = config.bowerlibs.map(function(p) {
     return path.resolve('bower_components', p)
   })
@@ -104,7 +104,9 @@ gulp.task('bundle:libs', function() {
   return es.concat(
     streamqueue({ objectMode: true },
       gulp.src(scriptpaths),
-      gulpBrowserify({},{
+      gulpBrowserify({
+        noParse: ['jquery','underscore','backbone']
+      },{
         //detectGlobals: false
       },{
         'require': config.libs
