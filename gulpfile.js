@@ -36,9 +36,9 @@ var echo = function(obj) {
 
 // Raise error
 var raise = function(err) {
-  console.error(err.stack)
+  err = err.stack || err
   echo({ 
-    errmsg: '<pre>'+err.stack+'</pre>',
+    errmsg: '<pre style="font-size:14px">'+err+'</pre><style>#app{display:none!important}</style>',
     appname: 'Error'
   })
 }
@@ -59,6 +59,7 @@ gulpBrowserify = function(options, bundleOptions, commands) {
       b[cmd](value)
     })
   }
+  //b.on('bundle', function (bundle) { console.error('BUNDLE')})
   return b.bundle(bundleOptions)
 }
 
@@ -105,7 +106,8 @@ gulp.task('bundle:libs', function() {
     streamqueue({ objectMode: true },
       gulp.src(scriptpaths),
       gulpBrowserify({
-        noParse: ['jquery','underscore','backbone']
+        noParse: ['jquery','underscore','backbone'],
+        debug: true
       },{
         //detectGlobals: false
       },{
@@ -126,6 +128,7 @@ gulp.task('bundle:libs', function() {
 gulp.task('bundle:appscripts', function(cb) {
   var apppath = path.resolve( config.src, 'js/index.js' )
   return es.concat(
+
     gulpBrowserify({
       // Options
       entries: apppath
@@ -136,8 +139,10 @@ gulp.task('bundle:appscripts', function(cb) {
       // Methods
       'external': config.libs,
       'transform': ['reactify', 'debowerify']
-    }).pipe(source(apppath)).pipe(buffer())
-      .on('error', raise)
+    }).on('error', raise)
+      .pipe(source(apppath))
+      .pipe(buffer())
+      
       .pipe(rename('app.bundle.js'))
       //.pipe(uglify())
       .pipe(gulp.dest(config.public + 'js')),
