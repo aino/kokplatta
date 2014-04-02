@@ -6,8 +6,7 @@ module.exports = React.createClass({
 
   getInitialState: function() {
     return {
-      url: 'loading',
-      urlParams: []
+      url: { name: null, params: [] }
     }
   },
 
@@ -34,15 +33,17 @@ module.exports = React.createClass({
   },
 
   render: function() {
+    if ( !this.state.url.name )
+      return <h1>Loading...</h1>
 
     // text in red for the earth url state
-    var style = this.state.url == 'earth' ? {color: '#c44'} : {}
-
+    var style = this.state.url.name == 'earth' ? {color: '#c44'} : {}
+    var greeting = this.props.models.example.get('greeting')
     return (
       <div>
         <a href="/">Home</a>&nbsp;
         <a href="/earth">Earth</a>
-        <h1 style={style}>{'Hello '+this.props.models.example.get('greeting')}</h1>
+        <h1 style={style}>{'Hello ' + greeting}</h1>
       </div>
     )
   }

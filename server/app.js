@@ -13,7 +13,9 @@ app.use(bodyParser())
 app.use(serve( config.public ))
 
 app.use(route.get('/api/*', function*() {
-  this.body = '{"greeting": "World"}'
+  var id = this.request.query.id
+  // ... get object from database
+  this.body = {greeting: "World"}
 }))
 
 app.use(function*() {

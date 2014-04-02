@@ -9,6 +9,7 @@ module.exports = {
 
   home: function(params, cb) {
     models.example.fetch({
+      data: { id: 9 },
       success: cb
     })
   },
