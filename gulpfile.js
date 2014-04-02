@@ -19,49 +19,10 @@ var es = require('event-stream')
 var streamqueue = require('streamqueue')
 var source = require('vinyl-source-stream')
 var buffer = require('gulp-buffer')
+var watch = require('gulp-watch')
 
 var pjson = require('./package.json')
 var config = require('./conf/config')
-
-
-// Echo to HTML
-var echo = function(obj) {
-  return gulp.src(config.src + 'html/*.html')
-    .pipe(htmltemplate(obj, {
-      'interpolate': /{{([\s\S]+?)}}/g
-    }))
-    .pipe(htmlminify(opts))
-    .pipe(gulp.dest(config.public))
-}
-
-// Raise error
-var raise = function(err) {
-  err = err.stack || err
-  echo({ 
-    errmsg: '<pre style="font-size:14px">'+err+'</pre><style>#app{display:none!important}</style>',
-    appname: 'Error'
-  })
-}
-
-// Create Browserify stream
-gulpBrowserify = function(options, bundleOptions, commands) {
-  var b
-  options.extensions || (options.extensions = ['.js'])
-  bundleOptions || (bundleOptions = {})
-  b = browserify(options)
-
-  for ( cmd in commands ) {
-    gutil.log('Browserify running ' + cmd  + ':')
-    values = commands[cmd]
-    if ( typeof values === 'string' ) values = [values]
-    values.forEach(function(value) {
-      gutil.log('b[' + cmd + '](' + value + ')')
-      b[cmd](value)
-    })
-  }
-  //b.on('bundle', function (bundle) { console.error('BUNDLE')})
-  return b.bundle(bundleOptions)
-}
 
 // Check if installed version of node is enough. Need >=0.11
 // Else, check if n is installed and use that
@@ -77,22 +38,65 @@ if ( ~~nodeversion.match(/\d+\.(\d+)/)[1] > 10 ) {
   process.exit(1)
 }
 
-// Html
-gulp.task('html', function() {
+//////////////
+
+// Echo to HTML
+var echo = function(obj) {
+  return gulp.src(config.src + 'html/*.html')
+    .pipe(htmltemplate(obj, {
+      'interpolate': /{{([\s\S]+?)}}/g
+    }))
+    .pipe(htmlminify(opts))
+    .pipe(gulp.dest(config.public))
+}
+
+// Raise error
+var raise = function(err) {
+  err = err.stack || err
+  gutil.log(err)
+  echo({ 
+    errmsg: '<code style="font-size:14px">'+err+'</code><style>#app{display:none!important}</style>',
+    appname: 'Error'
+  })
+}
+
+// Create Browserify stream
+var gulpBrowserify = function(options, bundleOptions, commands) {
+  var b
+  options.extensions || (options.extensions = ['.js'])
+  bundleOptions || (bundleOptions = {})
+  b = browserify(options)
+
+  for ( cmd in commands ) {
+    gutil.log('Browserify running ' + cmd  + ':')
+    values = commands[cmd]
+    if ( typeof values === 'string' ) values = [values]
+    values.forEach(function(value) {
+      gutil.log('b[' + cmd + '](' + value + ')')
+      b[cmd](value)
+    })
+  }
+  return b.bundle(bundleOptions)
+}
+
+//////
+// create tasks
+
+var task = {}
+
+task.html = function() {
   return echo({
     errmsg: '',
     appname: pjson.name || 'Name your app'
   })
-})
+}
 
-// Clean
-gulp.task('clean', function() {
+task.clean = function() {
   return gulp.src([config.public + 'html', config.public + 'css', config.public + 'js', config.public + 'i'], {read: false})
     .pipe(clean())
-})
+}
 
-// Build lib css+js
-gulp.task('bundle:libs', function() {
+task.lib = function() {
 
   //var corepath = path.resolve(config.src, 'js/_lib.js')
   var scriptpaths = config.bowerlibs.map(function(p) {
@@ -106,8 +110,7 @@ gulp.task('bundle:libs', function() {
     streamqueue({ objectMode: true },
       gulp.src(scriptpaths),
       gulpBrowserify({
-        noParse: ['jquery','underscore','backbone'],
-        debug: true
+        noParse: ['jquery','underscore','backbone']
       },{
         //detectGlobals: false
       },{
@@ -122,56 +125,59 @@ gulp.task('bundle:libs', function() {
       .pipe(minifycss())
       .pipe(gulp.dest(config.public + 'css'))
   )
-})
+}
 
-// Build app js
-gulp.task('bundle:appscripts', function(cb) {
+task.app = function(cb) {
   var apppath = path.resolve( config.src, 'js/index.js' )
   return es.concat(
 
     gulpBrowserify({
-      // Options
       entries: apppath
-    }, {
-      // Bundle Options
+    },{
       debug: false
-    }, {
+    },{
       // Methods
       'external': config.libs,
       'transform': ['reactify', 'debowerify']
-    }).on('error', raise)
+    })
+      .on('error', raise)
       .pipe(source(apppath))
       .pipe(buffer())
-      
       .pipe(rename('app.bundle.js'))
       //.pipe(uglify())
       .pipe(gulp.dest(config.public + 'js')),
+
+    task.html(),
+
     gulp.src( config.src + 'js/loader.js' )
       .pipe(rename('i'))
       .pipe(uglify({mangle:false}))
       .pipe(gulp.dest( config.public + 'js' ))
   )
-})
+}
 
-// Build app css
-gulp.task('bundle:appstyles', function() {
+task.styles = function() {
   return gulp.src(config.src + 'css/app.css')
     //.pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2')) // <!-- production
     .pipe(less({ sourceMap: true, silent: true }))  // <-- development
     .pipe(rename('app.bundle.css'))
     //.pipe(minifycss()) // <-- production
     .pipe(gulp.dest(config.public + 'css'))
-})
+}
 
-gulp.task('watch', function() {
-  gulp.watch(config.src + 'js/**/*.js', ['bundle:appscripts'])
-  gulp.watch(config.src + 'html/**/*.html', ['html'])
-  gulp.watch(config.src + 'css/**/*.css', ['bundle:appstyles'])
-  gulp.watch(config.src + 'i/**/*', ['images'])
-  gulp.watch('gulpfile.js', ['build:libs', 'build:app'])
-})
+task.images = function() {
+  return gulp.src(config.src + 'i/**/*.i')
+    .pipe(gulp.dest(config.public + 'i'))
+}
 
-gulp.task( 'supervisor', function() {
+task.watch = function() {
+  watch({glob: config.src + 'js/**/*.js'}, function() { task.app() })
+  watch({glob: config.src + 'html/**/*.html'}, function() { task.html() })
+  watch({glob: config.src + 'css/**/*.css'}, function() { task.styles() })
+  watch({glob: config.src + 'i/**/*.i'}, function() { task.images() })
+}
+
+task.supervisor = function() {
   supervisor('server/app.js', {
     args: [],
     watch: [ 'node_modules', 'server', 'conf' ],
@@ -182,16 +188,19 @@ gulp.task( 'supervisor', function() {
     noRestartOn: 'error',
     quiet: false
   } )
-} )
+}
 
-gulp.task( 'build:libs', ['bundle:libs'], function () {
-  gutil.log( 'Build done' )
+gulp.task( 'libs', function() {
+  task.lib()
+  gutil.log( 'Libs built' )
 })
 
-gulp.task( 'build:app', ['bundle:appscripts', 'bundle:appstyles', 'html'], function () {
-  gutil.log( 'Build done' )
-})
-
-gulp.task( 'default', ['build:app', 'watch', 'supervisor'], function () {
+gulp.task( 'default', function() {
+  task.app()
+  task.styles()
+  task.html()
+  task.images()
+  task.watch()
+  task.supervisor()
   gutil.log( 'Running server on ' + config.port )
 })

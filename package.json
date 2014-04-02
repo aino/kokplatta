@@ -42,7 +42,8 @@
     "streamqueue": "0.0.5",
     "gulp-buffer": "0.0.2",
     "vinyl-source-stream": "~0.1.1",
-    "browserify": "~3.33.1"
+    "browserify": "~3.33.1",
+    "gulp-watch": "^0.5.3"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

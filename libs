@@ -1,2 +1,2 @@
 #!/bin/bash
-./node_modules/.bin/gulp build:libs --progress --colors
+./node_modules/.bin/gulp libs --progress --colors
