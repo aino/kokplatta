@@ -20,11 +20,15 @@ window.Run = function() {
   React.renderComponent(App, document.getElementById('app'))
 
   // start router
-  Router.on('route', function(urlName, params) {
-    if ( Routes.hasOwnProperty(urlName) ) {
-      Routes[urlName](params, function() {
+  Router.on('route', function(name, params) {
+    if ( Routes.hasOwnProperty(name) ) {
+      Routes[name](params, function() {
         App.setState({ 
-          url: { name: urlName, params: params }
+          url: { 
+            name: name, 
+            params: params,
+            path: window.location.pathname
+          }
         })
       })
     }
