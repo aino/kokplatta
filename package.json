@@ -1,6 +1,6 @@
 {
   "name": "Kokplatta",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Ainos boilerplate for web apps",
   "main": "index.js",
   "dependencies": {
