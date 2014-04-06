@@ -1,22 +1,28 @@
 var koa = require('koa')
+var logger = require('koa-logger')
+var route = require('koa-route')
+var bodyParser = require('koa-body-parser')
+var serve = require('koa-static')
+var config = require('../conf/config')
+var fs = require('co-fs')
 
-var app = koa()
-  , bodyParser = require('koa-body-parser')
-  , compress = require('koa-compress')
-  , config = require('../conf/config')
-  , logger = require('koa-logger')
-  , route = require('koa-route')
-  , serve = require('koa-static')
-
+var app = module.exports = koa()
 
 app.use(logger())
 app.use(bodyParser())
-app.use(compress())
-app.use(serve('../public/'))
+app.use(serve( config.public ))
 
-app.use(route.get('/test', function*(){
-  this.body = "test"
+app.use(route.get('/api/*', function*() {
+  var id = this.request.query.id
+  // ... get object from database
+  this.body = {greeting: "Earth"}
 }))
 
+app.use(function*() {
+  var file = yield fs.readFile( config.public+'index.html' )
+  this.status = 200
+  this.type = 'text/html; charset=utf-8'
+  this.body = file
+})
 
 if (!module.parent) app.listen(config.port);
