@@ -6,7 +6,7 @@
   function b() {
     I = /\.css$/.test(N[O])
     A = d.createElement(I ? "link" : "script")
-    A[I ? "href" : "src"] = (I ? '/css/' : '/js/') + N[O]
+    A[I ? "href" : "src"] = '/assets/'+N[O]
     d.getElementsByTagName('head')[0].appendChild(A)
     if (I) {
       A.rel = "stylesheet"

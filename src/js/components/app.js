@@ -44,9 +44,10 @@ module.exports = React.createClass({
 
     return (
       <div>
+        <img src="/assets/aino.svg" /><br />
+        <h1 style={style}>{'Hello ' + greeting}</h1>
         <a href="/">Home</a>&nbsp;
         <a href="/earth">Earth</a>
-        <h1 style={style}>{'Hello ' + greeting}</h1>
       </div>
     )
   }

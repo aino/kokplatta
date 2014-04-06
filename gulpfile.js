@@ -6,7 +6,6 @@ var autoprefixer = require('gulp-autoprefixer')
 var minifycss = require('gulp-minify-css')
 var uglify = require('gulp-uglify')
 var rename = require('gulp-rename')
-var clean = require('gulp-clean')
 var concat = require('gulp-concat')
 var cache = require('gulp-cache')
 var supervisor = require('gulp-supervisor')
@@ -91,14 +90,8 @@ task.html = function() {
   })
 }
 
-task.clean = function() {
-  return gulp.src([config.public + 'html', config.public + 'css', config.public + 'js', config.public + 'i'], {read: false})
-    .pipe(clean())
-}
-
 task.lib = function() {
 
-  //var corepath = path.resolve(config.src, 'js/_lib.js')
   var scriptpaths = config.bowerlibs.map(function(p) {
     return path.resolve('bower_components', p)
   })
@@ -119,11 +112,11 @@ task.lib = function() {
     )
       .pipe(concat('lib.bundle.js'))
       //.pipe(uglify())
-      .pipe(gulp.dest(config.public + 'js')),
+      .pipe(gulp.dest(config.public + 'assets')),
     gulp.src( stylepaths )
       .pipe(concat('lib.bundle.css'))
       .pipe(minifycss())
-      .pipe(gulp.dest(config.public + 'css'))
+      .pipe(gulp.dest(config.public + 'assets'))
   )
 }
 
@@ -145,14 +138,14 @@ task.app = function(cb) {
       .pipe(buffer())
       .pipe(rename('app.bundle.js'))
       //.pipe(uglify())
-      .pipe(gulp.dest(config.public + 'js')),
+      .pipe(gulp.dest(config.public + 'assets')),
 
     task.html(),
 
     gulp.src( config.src + 'js/loader.js' )
-      .pipe(rename('i'))
+      .pipe(rename('load'))
       .pipe(uglify({mangle:false}))
-      .pipe(gulp.dest( config.public + 'js' ))
+      .pipe(gulp.dest( config.public + 'assets' ))
   )
 }
 
@@ -165,16 +158,16 @@ task.styles = function() {
     .pipe(gulp.dest(config.public + 'css'))
 }
 
-task.images = function() {
-  return gulp.src(config.src + 'i/**/*.i')
-    .pipe(gulp.dest(config.public + 'i'))
+task.files = function() {
+  return gulp.src(config.src + 'files/**/*')
+    .pipe(gulp.dest(config.public + 'assets'))
 }
 
 task.watch = function() {
   watch({glob: config.src + 'js/**/*.js'}, function() { task.app() })
   watch({glob: config.src + 'html/**/*.html'}, function() { task.html() })
   watch({glob: config.src + 'css/**/*.css'}, function() { task.styles() })
-  watch({glob: config.src + 'i/**/*.i'}, function() { task.images() })
+  watch({glob: config.src + 'files/**/*'}, function() { task.files() })
 }
 
 task.supervisor = function() {
@@ -199,7 +192,7 @@ gulp.task( 'default', function() {
   task.app()
   task.styles()
   task.html()
-  task.images()
+  task.files()
   task.watch()
   task.supervisor()
   gutil.log( 'Running server on ' + config.port )
