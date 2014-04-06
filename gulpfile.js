@@ -157,7 +157,7 @@ task.styles = function() {
     .pipe(less({ sourceMap: true, silent: true }))  // <-- development
     .pipe(rename('app.css'))
     //.pipe(minifycss()) // <-- production
-    .pipe(gulp.dest(config.public + 'css'))
+    .pipe(gulp.dest(config.public + 'assets'))
 }
 
 task.assets = function() {
