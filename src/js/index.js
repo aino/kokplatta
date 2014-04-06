@@ -13,11 +13,8 @@ Backbone.$ = $
 // expose a Run method instead of module for browser loader
 window.Run = function() {
 
-  // pass the data to the app
-  var App = AppComponent({ models: models })
-
   // render the app
-  React.renderComponent(App, document.getElementById('app'))
+  var App = React.renderComponent(AppComponent({ models: models }), document.getElementById('app'))
 
   // start router
   Router.on('route', function(name, params) {
