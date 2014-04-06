@@ -92,12 +92,14 @@ task.html = function() {
 
 task.lib = function() {
 
-  var scriptpaths = config.bowerlibs.map(function(p) {
+  var scriptpaths = config.bowerjs.map(function(p) {
     return path.resolve('bower_components', p)
   })
-  var stylepaths = config.bowerstyles.map(function(p) {
+  var stylepaths = config.bowercss.map(function(p) {
     return path.resolve('bower_components', p)
-  })
+  }).concat(config.libcss.map(function(p) {
+    return config.src + 'css/'+p
+  }))
 
   return es.concat(
     streamqueue({ objectMode: true },
@@ -107,7 +109,7 @@ task.lib = function() {
       },{
         //detectGlobals: false
       },{
-        'require': config.libs
+        'require': config.npmjs
       }).pipe(source()).pipe(buffer())
     )
       .pipe(concat('lib.js'))
@@ -130,7 +132,7 @@ task.app = function(cb) {
       debug: false
     },{
       // Methods
-      'external': config.libs,
+      'external': config.npmjs,
       'transform': ['reactify', 'debowerify']
     })
       .on('error', raise)
