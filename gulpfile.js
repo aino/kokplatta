@@ -110,11 +110,11 @@ task.lib = function() {
         'require': config.libs
       }).pipe(source()).pipe(buffer())
     )
-      .pipe(concat('lib.bundle.js'))
+      .pipe(concat('lib.js'))
       //.pipe(uglify())
       .pipe(gulp.dest(config.public + 'assets')),
     gulp.src( stylepaths )
-      .pipe(concat('lib.bundle.css'))
+      .pipe(concat('lib.css'))
       .pipe(minifycss())
       .pipe(gulp.dest(config.public + 'assets'))
   )
@@ -136,7 +136,7 @@ task.app = function(cb) {
       .on('error', raise)
       .pipe(source(apppath))
       .pipe(buffer())
-      .pipe(rename('app.bundle.js'))
+      .pipe(rename('app.js'))
       //.pipe(uglify())
       .pipe(gulp.dest(config.public + 'assets')),
 
@@ -153,13 +153,13 @@ task.styles = function() {
   return gulp.src(config.src + 'css/app.css')
     //.pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 2')) // <!-- production
     .pipe(less({ sourceMap: true, silent: true }))  // <-- development
-    .pipe(rename('app.bundle.css'))
+    .pipe(rename('app.css'))
     //.pipe(minifycss()) // <-- production
     .pipe(gulp.dest(config.public + 'css'))
 }
 
-task.files = function() {
-  return gulp.src(config.src + 'files/**/*')
+task.assets = function() {
+  return gulp.src(config.src + 'assets/**/*')
     .pipe(gulp.dest(config.public + 'assets'))
 }
 
@@ -167,7 +167,7 @@ task.watch = function() {
   watch({glob: config.src + 'js/**/*.js'}, function() { task.app() })
   watch({glob: config.src + 'html/**/*.html'}, function() { task.html() })
   watch({glob: config.src + 'css/**/*.css'}, function() { task.styles() })
-  watch({glob: config.src + 'files/**/*'}, function() { task.files() })
+  watch({glob: config.src + 'assets/**/*'}, function() { task.assets() })
 }
 
 task.supervisor = function() {
@@ -192,7 +192,7 @@ gulp.task( 'default', function() {
   task.app()
   task.styles()
   task.html()
-  task.files()
+  task.assets()
   task.watch()
   task.supervisor()
   gutil.log( 'Running server on ' + config.port )

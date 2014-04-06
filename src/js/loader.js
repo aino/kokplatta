@@ -1,10 +1,10 @@
 (function(A,I,N,O) {
-  O = 0
-  N = "lib.bundle.css app.bundle.css lib.bundle.js app.bundle.js".split(' ')
   var d = document
+  O = 0
+  N = "lib.css app.css lib.js app.js".split(' ')
   b()
   function b() {
-    I = /\.css$/.test(N[O])
+    I = /\.css/.test(N[O])
     A = d.createElement(I ? "link" : "script")
     A[I ? "href" : "src"] = '/assets/'+N[O]
     d.getElementsByTagName('head')[0].appendChild(A)
