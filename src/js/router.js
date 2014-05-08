@@ -8,4 +8,7 @@ var Router = Backbone.Router.extend({
   }
 })
 
-module.exports = new Router()
+var router = new Router()
+router.history = []
+
+module.exports = router

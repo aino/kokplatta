@@ -1,17 +1,17 @@
 /** @jsx React.DOM */
 
 var React = require('react')
+var models = require('../models')
+var TouchClick = require('./touchclick')
 
 module.exports = React.createClass({
 
   getInitialState: function() {
     return {
-      url: { name: null, params: [], path: window.location.pathname }
+      modal: false,
+      route: { name: null, params: [], slide: false },
+      wasmodal: false
     }
-  },
-
-  getDefaultProps: function() {
-    return { models: {} }
   },
 
   componentDidMount: function() {
@@ -34,21 +34,21 @@ module.exports = React.createClass({
 
   render: function() {
 
-    // if there is no url name, we can assume that the route hasn't called it's first callback yet
-    if ( !this.state.url.name )
+    // if there is no route name, we can assume that the route hasn't called it's first callback yet
+    if ( !this.state.route.name )
       return <h1>Loading...</h1>
 
-    // text in red for the earth url state
-    var style = this.state.url.name == 'earth' ? {color: '#c44'} : {}
-    var greeting = this.props.models.example.get('greeting')
+    // text in red for the earth route state
+    var style = this.state.route.name == 'earth' ? {color: '#c44'} : {}
+    var greeting = models.examples.getModel({type: 'greeting'})
 
     return (
-      <div>
+      <TouchClick handler={this.props.clickHandler}>
         <img src="/assets/aino.svg" /><br />
-        <h1 style={style}>{'Hello ' + greeting}</h1>
+        <h1 style={style}>{'Hello ' + greeting.get('value')}</h1>
         <a href="/">Home</a>&nbsp;
-        <a href="/earth">Earth</a>
-      </div>
+        <button data-href="/earth">Earth</button>
+      </TouchClick>
     )
   }
 })
