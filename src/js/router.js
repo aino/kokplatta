@@ -1,9 +1,15 @@
 var Backbone = require('backbone')
 
 var Router = Backbone.Router.extend({
+  initialize: function() {
+    this.route(/(.*)\/+$/, "trailFix", function (id) {
+      // remove all trailing slashes if more than one
+      this.navigate(id.replace(/(\/)+$/, ''), true);
+    })
+  },
   routes: {
     "": "home",
-    "earth(/:likes)": "earth",
+    "earth(/:city)(/:area)": "earth",
     "*notFound": "404"
   }
 })

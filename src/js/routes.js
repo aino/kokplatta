@@ -17,5 +17,9 @@ module.exports = {
     models.examples.load({
       type: 'greeting'
     })
+  },
+
+  '404': function() {
+    console.log('404')
   }
 }

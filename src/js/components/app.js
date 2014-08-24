@@ -2,7 +2,7 @@
 
 var React = require('react')
 var models = require('../models')
-var TouchClick = require('./touchclick')
+var TouchClick = require('ainojs-react-touchclick')
 
 module.exports = React.createClass({
 
@@ -34,20 +34,29 @@ module.exports = React.createClass({
 
   render: function() {
 
+    var routeName = this.state.route.name
+
     // if there is no route name, we can assume that the route hasn't called it's first callback yet
-    if ( !this.state.route.name )
-      return <h1>Loading...</h1>
+    if ( !routeName )
+      return <div />
+
+    if ( routeName == '404' )
+      return <div>404</div>
 
     // text in red for the earth route state
     var style = this.state.route.name == 'earth' ? {color: '#c44'} : {}
     var greeting = models.examples.getModel({type: 'greeting'})
 
     return (
-      <TouchClick handler={this.props.clickHandler}>
+      <TouchClick click={this.props.clickHandler}>
         <img src="/assets/aino.svg" /><br />
         <h1 style={style}>{'Hello ' + greeting.get('value')}</h1>
         <a href="/">Home</a>&nbsp;
-        <button data-href="/earth">Earth</button>
+        <a href="/earth">Earth</a>
+        <a href="/earth/gothenburg">Gothenburg</a>
+        <a href="/earth?a=1">A</a>
+        <a href="/earth?b=1">B</a>
+        <a href="/303">404</a>&nbsp;
       </TouchClick>
     )
   }

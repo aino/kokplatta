@@ -1,46 +1,54 @@
 var Backbone = require('backbone')
 var $ = require('jquery')
 
+var trigger = function(result, success) {
+  this.empty = !result.result.length
+  this.reset(result.result)
+  this.loading = false
+  this.trigger('change')
+  typeof success == 'function' && success(result)
+}
+
 var BaseCollection = Backbone.Collection.extend({
 
   dataUrl: null,
-  getArray: function(response) {
-    return response.result
-  },
 
   cache: {},
 
   load: function(query, success, error) {
 
     this.loading = true
+    this.empty = false
     this.reset()
 
     var q = query ? JSON.stringify(query) : ''
 
-    var onload = function(response) {
-      this.reset( this.getArray(response) )
-      this.loading = false
-      this.trigger('change')
-      typeof success == 'function' && success(response)
-    }.bind(this)
-
     setTimeout(function() {
 
       if ( this.cache.hasOwnProperty(q) ) {
-        onload(this.cache[q])
+        var result = this.cache[q]
+        trigger.call(this, result, success)
         return
       }
 
       $.ajax({
         url: this.dataUrl,
         data: query,
-        success: function(response) {
-          onload(response)
-          this.cache[q] = response
+        success: function(result) {
+          trigger.call(this, result, success)
+          this.cache[q] = result
         }.bind(this),
         dataType: 'json'
       })
     }.bind(this), 4)
+  },
+
+  isLoading: function() {
+    return !!this.loading
+  },
+
+  isEmpty: function() {
+    return !!this.empty
   },
 
   comparator: function(model) {

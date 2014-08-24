@@ -18,7 +18,10 @@
     "jquery": "~1.11.0",
     "underscore": "~1.6.0",
     "backbone": "~1.1.2",
-    "co-fs": "^1.2.0"
+    "co-fs": "^1.2.0",
+    "ainojs-detect": "^1.0.1",
+    "ainojs-react-touchclick": "^1.0.1",
+    "qs": "^1.2.2"
   },
   "devDependencies": {
     "gulp": "~3.6.0",

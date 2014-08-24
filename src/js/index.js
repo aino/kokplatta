@@ -7,7 +7,8 @@ var Router = require('./router')
 var Routes = require('./routes')
 var AppComponent = require('./components/app')
 var models = require('./models')
-var detect = require('ainojs/detect')
+var detect = require('ainojs-detect')
+var Qs = require('qs')
 
 Backbone.$ = $
 
@@ -85,7 +86,16 @@ window.Run = function() {
   }), node)
 
   // start router
-  Router.on('route', function(name, params) {
+  Router.on('route', function(name, parray) {
+
+    var paths = parray.slice(0)
+    var query = paths.pop()
+    query = query && window.location.search ? Qs.parse(query) : {}
+
+    var params = {
+      paths: paths,
+      query: query
+    }
 
     var route = $.extend({}, routeApi)
 
