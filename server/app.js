@@ -14,12 +14,7 @@ app.use(serve( config.public ))
 
 app.use(route.get('/api/examples', function*() {
   // ... get object from database
-  this.body = {result: [
-    {
-      type: 'greeting',
-      value: 'Earth'
-    }
-  ]}
+  this.body = {result: []}
 }))
 
 app.use(function*() {

@@ -6,7 +6,7 @@ var trigger = function(result, success) {
   this.reset(result.result)
   this.loading = false
   this.trigger('change')
-  typeof success == 'function' && success(result)
+  typeof success == 'function' && success(this, result.result)
 }
 
 var BaseCollection = Backbone.Collection.extend({
@@ -60,8 +60,7 @@ var BaseCollection = Backbone.Collection.extend({
     var model = this.findWhere(needle)
     if ( model )
       return model
-    if ( this.loading )
-      return new this.model() // return empty model so react can still render
+    return new this.model() // return empty model so react can still render
   }
 })
 

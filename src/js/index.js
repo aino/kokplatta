@@ -47,7 +47,7 @@ var clickHandler = function(e) {
       if ( h && h.length && h[h.length-1].path == href )
         Backbone.history.loadUrl(href)
       else
-      Router.navigate(href, true)
+        Router.navigate(href, true)
     }
   }
   
@@ -86,9 +86,8 @@ window.Run = function() {
   }), node)
 
   // start router
-  Router.on('route', function(name, parray) {
+  Router.on('route', function(name, paths) {
 
-    var paths = parray.slice(0)
     var query = paths.pop()
     query = query && window.location.search ? Qs.parse(query) : {}
 

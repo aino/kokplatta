@@ -35,6 +35,7 @@ module.exports = React.createClass({
   render: function() {
 
     var routeName = this.state.route.name
+    console.log('RN',routeName)
 
     // if there is no route name, we can assume that the route hasn't called it's first callback yet
     if ( !routeName )
