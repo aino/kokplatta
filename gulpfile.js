@@ -191,10 +191,6 @@ gulp.task( 'libs', function() {
 })
 
 gulp.task( 'default', function() {
-  task.app()
-  task.styles()
-  task.html()
-  task.assets()
   task.watch()
   task.supervisor()
   gutil.log( 'Running server on ' + config.port )

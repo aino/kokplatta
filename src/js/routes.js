@@ -15,10 +15,6 @@ var Routes = {
   earth: function(params) {
     models.examples.load({
       type: params.paths[0]
-    }, function(models) {
-      if ( models.isEmpty() ) {
-        // TODO send 404 from route
-      }
     })
   },
 
